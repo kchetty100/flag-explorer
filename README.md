@@ -125,10 +125,7 @@ The GitHub Actions workflow includes:
 
 ## Screenshots
 
-![Home Page](./screenshots/home.png)
-*Home page showing country flags grid*
-
-![Detail Page](./screenshots/detail.png)
+![Detail Page](./countrydetails.jpg)
 *Country details page*
 
 ## Contributing
