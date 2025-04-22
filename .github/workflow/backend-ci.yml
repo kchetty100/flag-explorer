@@ -1,0 +1,44 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        working-directory: ./backend
+        run: mvn -B clean package
+
+      - name: Run tests
+        working-directory: ./backend
+        run: mvn -B test
+
+      - name: Verify code formatting
+        working-directory: ./backend
+        run: mvn -B spotless:check
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/target/site/jacoco/jacoco.xml
+          flags: backend
+          name: codecov-umbrella
