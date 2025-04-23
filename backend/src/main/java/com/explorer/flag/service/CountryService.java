@@ -1,25 +1,40 @@
 package com.explorer.flag.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.explorer.flag.model.Country;
 import com.explorer.flag.model.CountryDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Service
 public class CountryService {
 
-  private final RestTemplate restTemplate = new RestTemplate();
-  //todo : Move this to a properties file and create placeholders
-  private static final String API_BASE_URL = "https://restcountries.com/v3.1";
+  private static final Logger logger = LoggerFactory.getLogger(CountryService.class);
 
+  private final RestTemplate restTemplate;
+  private final String apiBaseUrl;
+
+  public CountryService(RestTemplate restTemplate,
+                        @Value("${restcountries.api.base-url}")
+                        String apiBaseUrl) {
+    this.restTemplate = restTemplate;
+    this.apiBaseUrl = apiBaseUrl;
+  }
+
+  @Cacheable("countries")
   public List<Country> getAllCountries() {
-    Map<String, Object>[] response = restTemplate.getForObject(API_BASE_URL + "/all", Map[].class);
+    logger.info("Fetching all countries from external API");
+    Map<String, Object>[] response = restTemplate.getForObject(apiBaseUrl + "/all", Map[].class);
 
     return Arrays.stream(response)
         .map(country -> {
@@ -33,11 +48,14 @@ public class CountryService {
         .collect(Collectors.toList());
   }
 
-  public CountryDetails getCountryDetails(String name) {
+  @Cacheable(value = "countryDetails", key = "#name")
+  public Optional<CountryDetails> getCountryDetails(String name) {
+    logger.info("Fetching details for country: {}", name);
     try {
-      Map<String, Object>[] response = restTemplate.getForObject(API_BASE_URL + "/name/" + name, Map[].class);
+      Map<String, Object>[] response =
+          restTemplate.getForObject(apiBaseUrl + "/name/" + name, Map[].class);
       if (response == null || response.length == 0) {
-        return null;
+        return Optional.empty();
       }
 
       Map<String, Object> countryData = response[0];
@@ -46,14 +64,21 @@ public class CountryService {
       List<String> capitals = (List<String>) countryData.get("capital");
       Number population = (Number) countryData.get("population");
 
-      return new CountryDetails(
+      CountryDetails details = new CountryDetails(
           nameMap.get("common"),
           capitals != null && !capitals.isEmpty() ? capitals.get(0) : "N/A",
           population != null ? population.intValue() : 0,
           flagsMap.get("png")
       );
+
+      return Optional.of(details);
+
     } catch (HttpClientErrorException.NotFound e) {
-      return null; // Return null if the country is not found
+      logger.warn("Country not found: {}", name);
+      return Optional.empty();
+    } catch (Exception e) {
+      logger.error("Error fetching country details for: {}", name, e);
+      return Optional.empty();
     }
   }
 }
