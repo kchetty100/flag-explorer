@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"  # React served by nginx on port 80
+    networks:
+      - app-net
+    depends_on:
+      - backend
+
+networks:
+  app-net:
+    driver: bridge
