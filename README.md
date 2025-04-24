@@ -11,6 +11,7 @@ A full-stack application to explore country flags and details, built with Spring
 - Clean, modern user interface
 - RESTful API backend
 - CI/CD pipeline integration
+- Dockerized deployment for both frontend and backend
 
 ## Technologies Used
 
@@ -19,12 +20,14 @@ A full-stack application to explore country flags and details, built with Spring
 - Spring Boot 3.x
 - REST Countries API
 - Maven
+- Docker
 
 ### Frontend
 - React 18
 - Axios for API calls
 - React Router for navigation
 - CSS Grid/Flexbox for layout
+- Docker
 
 ## Getting Started
 
@@ -34,6 +37,7 @@ A full-stack application to explore country flags and details, built with Spring
 - Node.js 16+
 - npm or yarn
 - Maven
+- Docker
 
 ### Installation
 
@@ -55,7 +59,7 @@ A full-stack application to explore country flags and details, built with Spring
    npm install
    ```
 
-### Running the Application
+### Running the Application Locally
 
 1. Start the backend:
    ```bash
@@ -70,6 +74,17 @@ A full-stack application to explore country flags and details, built with Spring
    npm start
    ```
    The frontend will open in your browser at `http://localhost:3000`
+
+### Running the Application with Docker
+
+1. From the project root directory, build the containers:
+   ```bash
+   docker compose up --build
+   ```
+
+2. Access the application:
+   - Backend: `http://localhost:8080`
+   - Frontend: `http://localhost:3000`
 
 ## Configuration
 
@@ -102,6 +117,7 @@ flag-explorer-app/
 │   │   ├── model/         # Data models
 │   │   ├── service/       # Business logic
 │   │   └── FlagExplorerApplication.java
+│   ├── Dockerfile         # Backend Dockerfile
 │   ├── pom.xml            # Maven config
 │   └── application.properties
 ├── frontend/
@@ -112,7 +128,9 @@ flag-explorer-app/
 │   │   ├── services/      # API services
 │   │   ├── App.js         # Main component
 │   │   └── index.js       # Entry point
+│   ├── Dockerfile         # Frontend Dockerfile
 │   └── package.json       # npm dependencies
+├── docker-compose.yml     # Docker orchestration file
 └── .github/workflows/     # CI/CD pipelines
 ```
 
@@ -121,6 +139,7 @@ flag-explorer-app/
 The GitHub Actions workflow includes:
 - Automated testing for backend and frontend
 - Build and package the application
+- Docker image build and push
 - Deployment (configure your deployment target)
 
 ## Screenshots
@@ -139,3 +158,4 @@ The GitHub Actions workflow includes:
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
